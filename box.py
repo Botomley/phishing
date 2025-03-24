@@ -91,3 +91,86 @@ y_pred = model.predict(X_test)
 print("Classification Report:")
 print(classification_report(y_test, y_pred))
 print("Accuracy:", accuracy_score(y_test, y_pred))
+
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Generate confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Plot confusion matrix
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=le.classes_, yticklabels=le.classes_)
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
+
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+# Get predicted probabilities for the positive class
+y_pred_proba = model.predict_proba(X_test)[:, 1]
+
+# Calculate ROC curve
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
+
+# Plot ROC curve
+plt.plot(fpr, tpr, label="ROC Curve")
+plt.plot([0, 1], [0, 1], linestyle="--", label="Random Guess")
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve")
+plt.legend()
+plt.show()
+
+# Calculate AUC
+auc_score = roc_auc_score(y_test, y_pred_proba)
+print("AUC Score:", auc_score)
+
+from sklearn.model_selection import GridSearchCV
+
+# Define the parameter grid
+param_grid = {
+    "n_estimators": [100, 200, 300],
+    "max_depth": [None, 10, 20, 30],
+    "min_samples_split": [2, 5, 10],
+    "min_samples_leaf": [1, 2, 4]
+}
+
+# Perform grid search
+grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring="accuracy", n_jobs=-1)
+grid_search.fit(X_train, y_train)
+
+# Print the best parameters
+print("Best Parameters:", grid_search.best_params_)
+
+# Evaluate the best model
+best_model = grid_search.best_estimator_
+y_pred_best = best_model.predict(X_test)
+print("Classification Report (Best Model):")
+print(classification_report(y_test, y_pred_best))
+
+
+from sklearn.model_selection import GridSearchCV
+
+# Define the parameter grid
+param_grid = {
+    "n_estimators": [100, 200, 300],
+    "max_depth": [None, 10, 20, 30],
+    "min_samples_split": [2, 5, 10],
+    "min_samples_leaf": [1, 2, 4]
+}
+
+# Perform grid search
+grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring="accuracy", n_jobs=-1)
+grid_search.fit(X_train, y_train)
+
+# Print the best parameters
+print("Best Parameters:", grid_search.best_params_)
+
+# Evaluate the best model
+best_model = grid_search.best_estimator_
+y_pred_best = best_model.predict(X_test)
+print("Classification Report (Best Model):")
+print(classification_report(y_test, y_pred_best))
