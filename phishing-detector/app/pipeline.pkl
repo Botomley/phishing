@@ -1,0 +1,11 @@
+import joblib
+from sklearn.pipeline import Pipeline
+
+# Assuming `best_model` is your trained model and `preprocessor` is your ColumnTransformer
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),  # Your preprocessing steps
+    ('classifier', best_model)       # Your trained model
+])
+
+# Save the entire pipeline
+joblib.dump(pipeline, "phishing_detection_pipeline.pkl")
