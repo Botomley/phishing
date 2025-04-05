@@ -174,3 +174,93 @@ best_model = grid_search.best_estimator_
 y_pred_best = best_model.predict(X_test)
 print("Classification Report (Best Model):")
 print(classification_report(y_test, y_pred_best))
+
+
+from sklearn.model_selection import GridSearchCV
+
+# Define the parameter grid
+param_grid = {
+    "n_estimators": [100, 200, 300],
+    "max_depth": [None, 10, 20, 30],
+    "min_samples_split": [2, 5, 10],
+    "min_samples_leaf": [1, 2, 4]
+}
+
+# Perform grid search
+grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring="accuracy", n_jobs=-1)
+grid_search.fit(X_train, y_train)
+
+# Print the best parameters
+print("Best Parameters:", grid_search.best_params_)
+
+# Evaluate the best model
+best_model = grid_search.best_estimator_
+y_pred_best = best_model.predict(X_test)
+print("Classification Report (Best Model):")
+print(classification_report(y_test, y_pred_best))
+
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from xgboost import XGBClassifier
+
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "SVM": SVC(probability=True),
+    "XGBoost": XGBClassifier()
+}
+
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    print(f"--- {name} ---")
+    print(classification_report(y_test, y_pred))
+
+
+from sklearn.ensemble import VotingClassifier
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+
+# Define best_model (assuming it's a RandomForestClassifier)
+best_model = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# Create Voting Classifier
+ensemble = VotingClassifier(estimators=[
+    ('rf', best_model),
+    ('xgb', XGBClassifier(use_label_encoder=False, eval_metric='logloss'))  # For newer XGBoost versions
+], voting='soft')
+
+# Train the ensemble model
+ensemble.fit(X_train, y_train)
+from sklearn.calibration import CalibratedClassifierCV
+calibrated_model = CalibratedClassifierCV(best_model, cv=5, method='isotonic')
+calibrated_model.fit(X_train, y_train)
+
+# 1. Load and clean data
+df = pd.read_csv(r"C:\Users\Admin\Downloads\datasets\url\phish.csv")
+df = df.dropna(subset=["TLD"])  # Drop rows with null TLDs
+
+# 2. Group rare TLDs
+threshold = 10
+counts = df["TLD"].value_counts()
+df["TLD"] = df["TLD"].apply(lambda x: x if counts.get(x, 0) >= threshold else "Other")
+
+# 3. One-hot encode TLD
+df = pd.get_dummies(df, columns=["TLD"], drop_first=True)
+
+import joblib
+from sklearn.pipeline import Pipeline
+
+# Assuming `best_model` is your trained model and `preprocessor` is your ColumnTransformer
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),  # Your preprocessing steps
+    ('classifier', best_model)       # Your trained model
+])
+
+# Save the entire pipeline
+joblib.dump(pipeline, "phishing_detection_pipeline.pkl")
+
+
+
+
+
