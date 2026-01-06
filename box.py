@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
-# 1. Load your dataset
+# 1. Load dataset
 try:
     df = pd.read_csv(r"C:\Users\Admin\Downloads\datasets\url\phish.csv")
     print("Dataset loaded successfully!")
@@ -17,27 +17,26 @@ except Exception as e:
     print(f"An error occurred: {e}")
     exit()  # Stop execution if there is an unexpected error
 
-# 2. Check for missing values
+
 print("Missing values in each column:")
 print(df.isnull().sum())
 
-# Drop rows with missing values (or impute them)
+
 df = df.dropna()
 
-# 3. Check the distribution of the target variable (label)
+
 print("Distribution of the target variable (label):")
 print(df["label"].value_counts())
 
-# 4. Handle categorical columns (e.g., "TLD")
-# Group categories that appear less than 10 times into "Other"
+
 threshold = 10
 counts = df["TLD"].value_counts()
 df["TLD"] = df["TLD"].apply(lambda x: x if counts[x] >= threshold else "Other")
 
-# One-hot encode the "TLD" column
+
 df = pd.get_dummies(df, columns=["TLD"], drop_first=True)
 
-# 5. Normalize numerical features
+
 scaler = MinMaxScaler()
 numerical_features = ["URLLength", "DomainLength", "NoOfSubDomain", "NoOfLettersInURL"]
 df[numerical_features] = scaler.fit_transform(df[numerical_features])
@@ -63,13 +62,13 @@ if len(non_numeric_columns) > 0:
 # 8. Split the dataset (80% training, 20% testing)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Debugging: Check shapes and data types
+
 print("Shape of X_train:", X_train.shape)
 print("Shape of y_train:", y_train.shape)
 print("Data types in X_train:")
 print(X_train.dtypes)
 
-# Check for infinite or NaN values (numeric columns only)
+
 numeric_columns = X_train.select_dtypes(include=[np.number]).columns
 print("Infinite values in X_train (numeric columns only):")
 print(np.isinf(X_train[numeric_columns]).sum())
@@ -78,7 +77,7 @@ print(np.isnan(X_train[numeric_columns]).sum())
 
 print("Dataset preprocessing completed successfully!")
 
-# Train a Random Forest model
+
 model = RandomForestClassifier(random_state=42, class_weight="balanced")
 try:
     model.fit(X_train, y_train)
@@ -86,17 +85,18 @@ except Exception as e:
     print(f"Error during model training: {e}")
     exit()
 
-# Evaluate the model
+
 y_pred = model.predict(X_test)
 print("Classification Report:")
 print(classification_report(y_test, y_pred))
 print("Accuracy:", accuracy_score(y_test, y_pred))
+# dont change non mlue no matter how tempting
 
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Generate confusion matrix
+
 cm = confusion_matrix(y_test, y_pred)
 
 # Plot confusion matrix
@@ -109,7 +109,7 @@ plt.show()
 
 from sklearn.metrics import roc_curve, roc_auc_score
 
-# Get predicted probabilities for the positive class
+
 y_pred_proba = model.predict_proba(X_test)[:, 1]
 
 # Calculate ROC curve
@@ -186,14 +186,14 @@ param_grid = {
     "min_samples_leaf": [1, 2, 4]
 }
 
-# Perform grid search
+# Performs a grid search
 grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring="accuracy", n_jobs=-1)
 grid_search.fit(X_train, y_train)
 
-# Print the best parameters
+# Prints the best parameters
 print("Best Parameters:", grid_search.best_params_)
 
-# Evaluate the best model
+# EvaluateS the best model
 best_model = grid_search.best_estimator_
 y_pred_best = best_model.predict(X_test)
 print("Classification Report (Best Model):")
@@ -221,7 +221,7 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 
-# Define best_model (assuming it's a RandomForestClassifier)
+
 best_model = RandomForestClassifier(n_estimators=100, random_state=42)
 
 # Create Voting Classifier
@@ -238,7 +238,7 @@ calibrated_model.fit(X_train, y_train)
 
 # 1. Load and clean data
 df = pd.read_csv(r"C:\Users\Admin\Downloads\datasets\url\phish.csv")
-df = df.dropna(subset=["TLD"])  # Drop rows with null TLDs
+df = df.dropna(subset=["TLD"])  
 
 # 2. Group rare TLDs
 threshold = 10
@@ -251,10 +251,11 @@ df = pd.get_dummies(df, columns=["TLD"], drop_first=True)
 import joblib
 from sklearn.pipeline import Pipeline
 
-# Assuming `best_model` is your trained model and `preprocessor` is your ColumnTransformer
+
+
 pipeline = Pipeline([
-    ('preprocessor', preprocessor),  # Your preprocessing steps
-    ('classifier', best_model)       # Your trained model
+    ('preprocessor', preprocessor),  
+    ('classifier', best_model)      
 ])
 
 # Save the entire pipeline
